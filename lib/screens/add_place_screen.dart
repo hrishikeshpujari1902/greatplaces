@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:greatplaces/widgets/image_input.dart';
+import '../providers/great_places.dart';
+import 'dart:io';
+import '../widgets/image_input.dart';
+import 'package:provider/provider.dart';
 
 class AddPlaceScreen extends StatefulWidget {
   static const routeName = 'add-place';
@@ -9,10 +12,26 @@ class AddPlaceScreen extends StatefulWidget {
 
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _titleController = TextEditingController();
+  File _pickedImage;
   @override
   void dispose() {
     _titleController.dispose();
     super.dispose();
+  }
+
+  void _selectImage(File pickedImage) {
+    _pickedImage = pickedImage;
+  }
+
+  void _savePlace() {
+    if (_titleController.text.isEmpty || _pickedImage == null) {
+      return;
+    }
+    Provider.of<GreatPlaces>(context, listen: false).addPlace(
+      pickedImage: _pickedImage,
+      pickedTitle: _titleController.text,
+    );
+    Navigator.of(context).pop();
   }
 
   @override
@@ -37,20 +56,23 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     SizedBox(
                       height: 10,
                     ),
-                    ImageInput(),
+                    ImageInput(_selectImage),
                   ],
                 ),
               ),
             ),
           ),
-          // ignore: deprecated_member_use
-          RaisedButton.icon(
-            onPressed: () {},
-            icon: Icon(Icons.add),
-            label: Text('Add Place'),
-            elevation: 0,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            color: Theme.of(context).accentColor,
+          Container(
+            height: 55,
+            // ignore: deprecated_member_use
+            child: RaisedButton.icon(
+              onPressed: _savePlace,
+              icon: Icon(Icons.add),
+              label: Text('Add Place'),
+              elevation: 0,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              color: Theme.of(context).accentColor,
+            ),
           ),
         ],
       ),
